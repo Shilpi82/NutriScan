@@ -50,11 +50,19 @@ export async function POST(req: NextRequest) {
       ...(productName ? { product_name: productName } : {}),
     });
 
-    const backendResponse = await fetch(`${BACKEND_URL}/analyze-food`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: backendBody,
-    });
+    let backendResponse: Response;
+    try {
+      backendResponse = await fetch(`${BACKEND_URL}/analyze-food`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: backendBody,
+      });
+    } catch {
+      return NextResponse.json(
+        { error: 'Backend service is unavailable. Please start the API server.', error_type: 'backend_unavailable' },
+        { status: 503 },
+      );
+    }
     const payload = (await backendResponse.json().catch(() => ({}))) as Record<string, unknown>;
 
     if (!backendResponse.ok) {
