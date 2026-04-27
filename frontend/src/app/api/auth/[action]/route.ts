@@ -72,8 +72,10 @@ async function forwardToBackend(
   return response;
 }
 
-export async function GET(request: NextRequest, context: { params: { action: string } }) {
-  const { action } = context.params;
+type RouteContext = { params: Promise<{ action: string }> };
+
+export async function GET(request: NextRequest, context: RouteContext) {
+  const { action } = await context.params;
 
   if (action === 'me') {
     return forwardToBackend(request, 'GET', '/auth/me', { authorize: true });
@@ -88,8 +90,8 @@ export async function GET(request: NextRequest, context: { params: { action: str
   return jsonResponse({ error: 'Not found.' }, 404);
 }
 
-export async function POST(request: NextRequest, context: { params: { action: string } }) {
-  const { action } = context.params;
+export async function POST(request: NextRequest, context: RouteContext) {
+  const { action } = await context.params;
 
   if (action === 'login' || action === 'signup' || action === 'history') {
     const body = await request.text();
@@ -106,8 +108,8 @@ export async function POST(request: NextRequest, context: { params: { action: st
   return jsonResponse({ error: 'Not found.' }, 404);
 }
 
-export async function DELETE(request: NextRequest, context: { params: { action: string } }) {
-  const { action } = context.params;
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const { action } = await context.params;
 
   if (action === 'logout') {
     return forwardToBackend(request, 'DELETE', '/auth/logout', { authorize: true });
